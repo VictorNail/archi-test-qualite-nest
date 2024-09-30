@@ -7,13 +7,17 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Expose } from 'class-transformer';
-import {BadRequestException} from "@nestjs/common";
-import {CreateOrderDto} from "../../presentation/order.controller";
 
+
+export enum Status{
+  "paid",
+  "create"
+}
 @Entity()
 export class Order {
   static maxPriceForOrder: number = 10;
   static MESSAGE_MAX_PRICE_FOR_ORDER: string = `The total order amount must be at least ${Order.maxPriceForOrder}€`;
+  static MESSAGE_NOT_FOUND_ORDER: string = "The order Id is not assigned.";
 
   @CreateDateColumn()
   @Expose({ groups: ['group_orders'] })
@@ -49,7 +53,7 @@ export class Order {
 
   @Column()
   @Expose({ groups: ['group_orders'] })
-  status: string;
+  status: Status = Status.create;
 
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
