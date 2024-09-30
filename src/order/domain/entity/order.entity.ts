@@ -7,9 +7,14 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Expose } from 'class-transformer';
+import {BadRequestException} from "@nestjs/common";
+import {CreateOrderDto} from "../../presentation/order.controller";
 
 @Entity()
 export class Order {
+  static maxPriceForOrder: number = 10;
+  static MESSAGE_MAX_PRICE_FOR_ORDER: string = `The total order amount must be at least ${Order.maxPriceForOrder}€`;
+
   @CreateDateColumn()
   @Expose({ groups: ['group_orders'] })
   createdAt: Date;
@@ -49,4 +54,11 @@ export class Order {
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
   paidAt: Date | null;
+
+  constructor(newCustomerName: string, newShippingAddress: string, newInvoiceAddress: string, newItems: Array<OrderItem>) {
+    this.customerName = newCustomerName;
+    this.shippingAddress = newShippingAddress;
+    this.invoiceAddress = newInvoiceAddress;
+    this.orderItems = newItems;
+  }
 }
