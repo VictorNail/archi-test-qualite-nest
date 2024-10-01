@@ -2,6 +2,8 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Order } from '../domain/entity/order.entity';
 import { OrderRepositoryInterface } from '../domain/port/order.repository.interface';
+import {OrderItem} from "../domain/entity/order-item.entity";
+import {NotFoundException} from "@nestjs/common";
 
 export default class OrderRepository
   extends Repository<Order>
@@ -39,5 +41,16 @@ export default class OrderRepository
     queryBuilder.where('order.id = :id', { id });
 
     await queryBuilder.delete().execute();
+  }
+
+  public getOrderById(orderId: string):Order{
+    const item = new OrderItem();
+    item.productName = "item1";
+    item.price = 45;
+    const order: Order = new Order("Name","22 rue des rues","22 rue des rues",[item,item]);
+    if(!order){
+      throw new NotFoundException(Order.MESSAGE_NOT_FOUND_ORDER);
+    }
+    return order;
   }
 }

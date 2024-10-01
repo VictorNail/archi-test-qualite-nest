@@ -1,4 +1,4 @@
-import {Order, Status} from "../entity/order.entity";
+import {Order} from "../entity/order.entity";
 import {OrderItem} from "../entity/order-item.entity";
 import {NotFoundException} from "@nestjs/common";
 

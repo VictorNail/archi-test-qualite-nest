@@ -13,7 +13,8 @@ import {BadRequestException, NotFoundException} from "@nestjs/common";
 export enum Status{
   "PAID",
   "PENDING",
-  "DELIVERY"
+  "DELIVERY",
+  "SHIPPED",
 }
 @Entity()
 export class Order {
@@ -26,7 +27,8 @@ export class Order {
   static MESSAGE_MAX_ITEM_FOR_ORDER: string =`The order amount must be at least ${Order.maxItem} items`;
   static MESSAGE_NOT_POSSIBLE_PAY: string = "It is not possible to pay for this order";
   static MESSAGE_NOT_POSSIBLE_DELIVERY: string = "It is not possible to delivery for this order";
-
+  static MESSAGE_SHIPPING_ADDRESS_NULL: string = "The shipping address is not listed";
+  static MESSAGE_DELETE_IMPOSSIBLE: string = "Unable to delete order";
 
 
 
@@ -56,6 +58,8 @@ export class Order {
   @Expose({ groups: ['group_orders'] })
   shippingAddress: string | null;
 
+  @Column({ nullable: true })
+  @Expose({ groups: ['group_orders'] })
   invoiceAddress: string | null;
 
   @Column({ nullable: true })
@@ -69,6 +73,14 @@ export class Order {
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
   private paidAt: Date | null;
+
+  @Column({ nullable: true })
+  @Expose({ groups: ['group_orders'] })
+  private deleteAt: Date | null;
+
+  @Column({ nullable: true })
+  @Expose({ groups: ['group_orders'] })
+  private deleteReason: string | null;
 
   constructor(newCustomerName: string, newShippingAddress: string, newInvoiceAddress: string, newItems: Array<OrderItem>) {
     this.customerName = newCustomerName;
@@ -99,5 +111,21 @@ export class Order {
     this.status = Status.DELIVERY;
     this.price += 5;
     this.shippingAddressSetAt = shippingAddressSet;
+  }
+
+  public isBilled(newBillingAddress: string){
+    if(!this.shippingAddress ||this.shippingAddress == ""){
+      throw new BadRequestException(Order.MESSAGE_SHIPPING_ADDRESS_NULL);
+    }
+    this.invoiceAddress = newBillingAddress ?? this.shippingAddress;
+    this.status=Status.SHIPPED;
+  }
+
+  public delete(deleteReason: string){
+    if(this.status == Status.SHIPPED){
+      throw new BadRequestException(Order.MESSAGE_DELETE_IMPOSSIBLE);
+    }
+    this.deleteAt = new Date();
+    this.deleteReason = deleteReason;
   }
 }

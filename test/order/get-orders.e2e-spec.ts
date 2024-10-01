@@ -5,11 +5,13 @@ import { AppModule } from './../../src/app.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order } from '../../src/order/domain/entity/order.entity';
+import {OrderItem} from "../../src/order/domain/entity/order-item.entity";
 
 describe('Get Orders (e2e)', () => {
   let app: INestApplication;
   let order1: Order;
   let orderRepository: Repository<Order>;
+  let item = new OrderItem();
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -21,7 +23,9 @@ describe('Get Orders (e2e)', () => {
 
     // Création d'une commande en BDD de test
     orderRepository = moduleFixture.get('OrderRepository');
-    order1 = new Order('John Doe', []);
+    item.productName = "item1";
+    item.price = 45;
+    order1 = new Order("Name","22 rue des rues","22 rue des rues",[item,item]);
     await orderRepository.save(order1);
   });
   it('should return all', async () => {
