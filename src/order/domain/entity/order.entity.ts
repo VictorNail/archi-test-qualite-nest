@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Expose } from 'class-transformer';
-import {NotFoundException} from "@nestjs/common";
+import {BadRequestException, NotFoundException} from "@nestjs/common";
 
 
 export enum Status{
@@ -75,7 +75,13 @@ export class Order {
     this.shippingAddress = newShippingAddress;
     this.invoiceAddress = newInvoiceAddress;
     this.orderItems = newItems;
+    if( this.orderItems.length > Order.maxItem){
+      throw new BadRequestException(Order.MESSAGE_MAX_ITEM_FOR_ORDER);
+    }
     this.price = this.orderItems.reduce((sum,item) => sum + item.price,0);
+    if( this.price < Order.maxPriceForOrder){
+      throw new BadRequestException(Order.MESSAGE_MAX_PRICE_FOR_ORDER);
+    }
   }
 
   public isPaid(){
