@@ -12,16 +12,22 @@ import {NotFoundException} from "@nestjs/common";
 
 export enum Status{
   "PAID",
-  "PENDING"
+  "PENDING",
+  "DELIVERY"
 }
 @Entity()
 export class Order {
   static maxPriceForOrder:number = 10;
+  static maxPriceForPay: number = 500;
+  static minItemForDelivery: number = 3;
   static maxItem:number = 5;
   static MESSAGE_MAX_PRICE_FOR_ORDER: string = `The total order amount must be at least ${Order.maxPriceForOrder}€`;
   static MESSAGE_NOT_FOUND_ORDER: string = "The order Id is not assigned";
   static MESSAGE_MAX_ITEM_FOR_ORDER: string =`The order amount must be at least ${Order.maxItem} items`;
   static MESSAGE_NOT_POSSIBLE_PAY: string = "It is not possible to pay for this order";
+  static MESSAGE_NOT_POSSIBLE_DELIVERY: string = "It is not possible to delivery for this order";
+
+
 
 
   @CreateDateColumn()
@@ -73,10 +79,19 @@ export class Order {
   }
 
   public isPaid(){
-    if(this.status == Status.PENDING || this.price > 500){
+    if(this.status != Status.PENDING || this.price > Order.maxPriceForPay){
       throw new NotFoundException(Order.MESSAGE_NOT_POSSIBLE_PAY);
     }
     this.status = Status.PAID;
     this.paidAt = new Date();
+  }
+
+  public isDelivery(shippingAddressSet: Date){
+    if(this.status != Status.PAID || this.orderItems.length < Order.minItemForDelivery){
+      throw new NotFoundException(Order.MESSAGE_NOT_POSSIBLE_DELIVERY);
+    }
+    this.status = Status.DELIVERY;
+    this.price += 5;
+    this.shippingAddressSetAt = shippingAddressSet;
   }
 }
