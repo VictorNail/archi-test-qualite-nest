@@ -6,7 +6,7 @@ export default class PayOrderService{
 
     public payOrder(orderId: string):Order{
         const orderPayed: Order = this.getOrderById(orderId);
-        orderPayed.status= Status.paid;
+        orderPayed.isPaid();
         return orderPayed;
     }
 
@@ -16,7 +16,7 @@ export default class PayOrderService{
         item.price = 45;
         const order: Order = new Order("Name","22 rue des rues","22 rue des rues",[item,item]);
         if(!order){
-            throw new NotFoundException(order, Order.MESSAGE_NOT_FOUND_ORDER);
+            throw new NotFoundException(Order.MESSAGE_NOT_FOUND_ORDER);
         }
         return order;
     }

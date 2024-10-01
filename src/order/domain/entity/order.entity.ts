@@ -7,17 +7,22 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Expose } from 'class-transformer';
+import {NotFoundException} from "@nestjs/common";
 
 
 export enum Status{
-  "paid",
-  "create"
+  "PAID",
+  "PENDING"
 }
 @Entity()
 export class Order {
-  static maxPriceForOrder: number = 10;
+  static maxPriceForOrder:number = 10;
+  static maxItem:number = 5;
   static MESSAGE_MAX_PRICE_FOR_ORDER: string = `The total order amount must be at least ${Order.maxPriceForOrder}€`;
-  static MESSAGE_NOT_FOUND_ORDER: string = "The order Id is not assigned.";
+  static MESSAGE_NOT_FOUND_ORDER: string = "The order Id is not assigned";
+  static MESSAGE_MAX_ITEM_FOR_ORDER: string =`The order amount must be at least ${Order.maxItem} items`;
+  static MESSAGE_NOT_POSSIBLE_PAY: string = "It is not possible to pay for this order";
+
 
   @CreateDateColumn()
   @Expose({ groups: ['group_orders'] })
@@ -53,16 +58,25 @@ export class Order {
 
   @Column()
   @Expose({ groups: ['group_orders'] })
-  status: Status = Status.create;
+  private status: Status = Status.PENDING;
 
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
-  paidAt: Date | null;
+  private paidAt: Date | null;
 
   constructor(newCustomerName: string, newShippingAddress: string, newInvoiceAddress: string, newItems: Array<OrderItem>) {
     this.customerName = newCustomerName;
     this.shippingAddress = newShippingAddress;
     this.invoiceAddress = newInvoiceAddress;
     this.orderItems = newItems;
+    this.price = this.orderItems.reduce((sum,item) => sum + item.price,0);
+  }
+
+  public isPaid(){
+    if(this.status == Status.PENDING || this.price > 500){
+      throw new NotFoundException(Order.MESSAGE_NOT_POSSIBLE_PAY);
+    }
+    this.status = Status.PAID;
+    this.paidAt = new Date();
   }
 }
