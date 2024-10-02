@@ -1,8 +1,11 @@
 import {Order} from "../entity/order.entity";
 import {OrderItem} from "../entity/order-item.entity";
 import {NotFoundException} from "@nestjs/common";
+import {OrderRepositoryInterface} from "../port/order.repository.interface";
 
 export default class PayOrderService{
+
+    constructor(private readonly orderRepository: OrderRepositoryInterface) {}
 
     public payOrder(orderId: string):Order{
         const orderPayed: Order = this.getOrderById(orderId);

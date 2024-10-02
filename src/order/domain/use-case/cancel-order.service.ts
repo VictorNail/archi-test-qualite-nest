@@ -1,13 +1,13 @@
 import {Order} from "../entity/order.entity";
-import OrderRepository from "../../infrastructure/order.repository";
+import {OrderRepositoryInterface} from "../port/order.repository.interface";
 
 export default class CancelOrderService {
 
-    constructor( private readonly orderRepository: OrderRepository)
+    constructor( private readonly orderRepository: OrderRepositoryInterface)
     {}
 
-    public cancelOrder(orderId: string, cancelReason: string):string{
-        const orderCancel: Order = this.orderRepository.getOrderById(orderId);
+    public async cancelOrder(orderId: string, cancelReason: string): Promise<string> {
+        const orderCancel: Order = await this.orderRepository.getOrderById(orderId);
         orderCancel.cancel(cancelReason);
         return "order Cancel";
     }

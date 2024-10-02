@@ -9,6 +9,8 @@ import PayOrderService from "./domain/use-case/pay-order.service";
 import DeliveryOrderService from "./domain/use-case/delivery-order.service";
 import BillingOrderService from "./domain/use-case/billing-order.service";
 import CancelOrderService from "./domain/use-case/cancel-order.service";
+import OrderRepositoryTypeOrm from "./infrastructure/order.repository";
+import {OrderRepositoryInterface} from "./domain/port/order.repository.interface";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Order, OrderItem])],
@@ -18,11 +20,41 @@ import CancelOrderService from "./domain/use-case/cancel-order.service";
       provide: 'OrderRepositoryInterface',
       useClass: OrderRepository,
     },
-    CreateOrderService,
-    PayOrderService,
-    DeliveryOrderService,
-    BillingOrderService,
-    CancelOrderService
+    {
+      provide :CreateOrderService,
+      useFactory: (orderRepository: OrderRepositoryInterface) => {
+        return new CreateOrderService(orderRepository);
+      },
+      inject: [OrderRepositoryTypeOrm],
+    },
+    {
+      provide :PayOrderService,
+      useFactory: (orderRepository: OrderRepositoryInterface) => {
+        return new PayOrderService(orderRepository);
+      },
+      inject: [OrderRepositoryTypeOrm],
+    },
+    {
+      provide :DeliveryOrderService,
+      useFactory: (orderRepository: OrderRepositoryInterface) => {
+        return new DeliveryOrderService(orderRepository);
+      },
+      inject: [OrderRepositoryTypeOrm],
+    },
+    {
+      provide :BillingOrderService,
+      useFactory: (orderRepository: OrderRepositoryInterface) => {
+        return new BillingOrderService(orderRepository);
+      },
+      inject: [OrderRepositoryTypeOrm],
+    },
+    {
+      provide :CancelOrderService,
+      useFactory: (orderRepository: OrderRepositoryInterface) => {
+        return new CancelOrderService(orderRepository);
+      },
+      inject: [OrderRepositoryTypeOrm],
+    }
   ],
 })
 export class OrderModule {}
