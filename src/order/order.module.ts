@@ -8,7 +8,7 @@ import CreateOrderService from "./domain/use-case/create-order.service";
 import PayOrderService from "./domain/use-case/pay-order.service";
 import DeliveryOrderService from "./domain/use-case/delivery-order.service";
 import BillingOrderService from "./domain/use-case/billing-order.service";
-import DeleteOrderService from "./domain/use-case/Delete-order.service";
+import CancelOrderService from "./domain/use-case/cancel-order.service";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Order, OrderItem])],
@@ -22,7 +22,7 @@ import DeleteOrderService from "./domain/use-case/Delete-order.service";
     PayOrderService,
     DeliveryOrderService,
     BillingOrderService,
-    DeleteOrderService
+    CancelOrderService
   ],
 })
 export class OrderModule {}

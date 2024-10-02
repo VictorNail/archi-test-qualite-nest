@@ -48,6 +48,14 @@ export class Order {
   @Expose({ groups: ['group_orders'] })
   customerName: string;
 
+  @Column({ nullable: true })
+  @Expose({ groups: ['group_orders'] })
+  customerPhoneNumber: number;
+
+  @Column({ nullable: true })
+  @Expose({ groups: ['group_orders'] })
+  customerEmail: string;
+
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order, {
     nullable: true,
   })
@@ -76,11 +84,11 @@ export class Order {
 
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
-  private deleteAt: Date | null;
+  private cancelAt: Date | null;
 
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
-  private deleteReason: string | null;
+  private cancelReason: string | null;
 
   constructor(newCustomerName: string, newShippingAddress: string, newInvoiceAddress: string, newItems: Array<OrderItem>) {
     this.customerName = newCustomerName;
@@ -121,11 +129,15 @@ export class Order {
     this.status=Status.SHIPPED;
   }
 
-  public delete(deleteReason: string){
+  public cancel(cancelReason: string){
     if(this.status == Status.SHIPPED){
       throw new BadRequestException(Order.MESSAGE_DELETE_IMPOSSIBLE);
     }
-    this.deleteAt = new Date();
-    this.deleteReason = deleteReason;
+    this.cancelAt = new Date();
+    this.cancelReason = cancelReason;
+  }
+
+  public isValid():boolean {
+    return true;
   }
 }

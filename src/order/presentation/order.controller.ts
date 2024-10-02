@@ -5,7 +5,7 @@ import CreateOrderService from "../domain/use-case/create-order.service";
 import PayOrderService from "../domain/use-case/pay-order.service";
 import DeliveryOrderService from "../domain/use-case/delivery-order.service";
 import BillingOrderService from "../domain/use-case/billing-order.service";
-import DeleteOrderService from "../domain/use-case/Delete-order.service";
+import CancelOrderService from "../domain/use-case/cancel-order.service";
 
 
 
@@ -31,7 +31,7 @@ export class BillingOrderDto {
     newBillingAddress: string;
 }
 
-export class DeleteOrderDto {
+export class CancelOrderDto {
     @IsNotEmpty()
     reason: string;
 }
@@ -43,7 +43,7 @@ export default class OrderController {
         private readonly payOrderService: PayOrderService,
         private readonly deliveryOrderService: DeliveryOrderService,
         private readonly billingOrderService: BillingOrderService,
-        private readonly deleteOrderService: DeleteOrderService,
+        private readonly cancelOrderService: CancelOrderService,
     ) {}
     @Get()
     async getOrders() {
@@ -71,7 +71,7 @@ export default class OrderController {
     }
 
     @Delete('id')
-    async deleteOrder(@Param('id') orderId: string, @Body() body : DeleteOrderDto){
-        return this.deleteOrderService.deleteOrder(orderId, body.reason);
+    async cancelOrder(@Param('id') orderId: string, @Body() body : CancelOrderDto){
+        return this.cancelOrderService.cancelOrder(orderId, body.reason);
     }
 }
