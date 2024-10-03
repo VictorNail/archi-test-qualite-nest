@@ -11,6 +11,9 @@ import BillingOrderService from "./domain/use-case/billing-order.service";
 import CancelOrderService from "./domain/use-case/cancel-order.service";
 import OrderRepositoryTypeOrm from "./infrastructure/order.repository";
 import {OrderRepositoryInterface} from "./domain/port/order.repository.interface";
+import PdfOrderRepositoryTypeOrm from "./infrastructure/pdf-order.repository";
+import pdfOrderService from "./domain/use-case/pdf-order.service";
+import {PdfOrderRepositoryInterface} from "./domain/port/pdf-order.repository.interface";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Order, OrderItem])],
@@ -21,6 +24,7 @@ import {OrderRepositoryInterface} from "./domain/port/order.repository.interface
       useClass: OrderRepository,
     },
     OrderRepositoryTypeOrm,
+    PdfOrderRepositoryTypeOrm,
     {
       provide :CreateOrderService,
       useFactory: (orderRepository: OrderRepositoryInterface) => {
@@ -55,6 +59,13 @@ import {OrderRepositoryInterface} from "./domain/port/order.repository.interface
         return new CancelOrderService(orderRepository);
       },
       inject: [OrderRepositoryTypeOrm],
+    },
+    {
+      provide :pdfOrderService,
+      useFactory: (orderRepository: OrderRepositoryInterface, pdfOrderRepository: PdfOrderRepositoryInterface) => {
+        return new pdfOrderService(pdfOrderRepository,orderRepository);
+      },
+      inject: [PdfOrderRepositoryTypeOrm,OrderRepositoryTypeOrm],
     }
   ],
 })

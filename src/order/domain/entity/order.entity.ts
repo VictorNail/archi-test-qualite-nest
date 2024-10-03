@@ -9,6 +9,7 @@ import {
 import { Expose } from 'class-transformer';
 import {BadRequestException, NotFoundException} from "@nestjs/common";
 import {IsNotEmpty} from "class-validator";
+import {PdfOrderRepositoryInterface} from "../port/pdf-order.repository.interface";
 
 
 export interface CreateOrderCommand {
@@ -155,5 +156,11 @@ export class Order {
 
   public isValid():boolean {
     return true;
+  }
+
+  public generatePdf(pdfOrderRepository: PdfOrderRepositoryInterface){
+      if(this.status != Status.PENDING){
+          pdfOrderRepository.generateOrder(this.customerName,this.orderItems);
+      }
   }
 }
