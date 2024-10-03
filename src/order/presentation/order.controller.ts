@@ -1,5 +1,5 @@
 import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
-import {ArrayMaxSize, ArrayMinSize, IsNotEmpty, IsString} from "class-validator";
+import {ArrayMaxSize, ArrayMinSize, IsDate, IsNotEmpty, IsString} from "class-validator";
 import {OrderItem} from "../domain/entity/order-item.entity";
 import CreateOrderService from "../domain/use-case/create-order.service";
 import PayOrderService from "../domain/use-case/pay-order.service";
@@ -8,9 +8,14 @@ import BillingOrderService from "../domain/use-case/billing-order.service";
 import CancelOrderService from "../domain/use-case/cancel-order.service";
 import {CreateOrderCommand} from "../domain/entity/order.entity";
 
-export class BillingOrderDto {
+export class NewAddressOrderDto {
     @IsString()
-    newBillingAddress: string;
+    newAddress: string;
+}
+
+export class NewDateOrderDto{
+    @IsDate()
+    newDate: Date;
 }
 
 export class CancelOrderDto {
@@ -43,13 +48,13 @@ export default class OrderController {
     }
 
     @Put(':id/delivery')
-    async deliveryOrder(@Param('id') orderId: string){
-        return this.deliveryOrderService.deliveryOrder(orderId);
+    async deliveryOrder(@Param('id') orderId: string, @Body() body: NewDateOrderDto){
+        return this.deliveryOrderService.deliveryOrder(orderId, body.newDate);
     }
 
     @Put(':id/billing')
-    async billingOrder(@Param('id') orderId: string, @Body() body : BillingOrderDto){
-        return this.billingOrderService.billingOrder(orderId, body.newBillingAddress);
+    async billingOrder(@Param('id') orderId: string, @Body() body : NewAddressOrderDto){
+        return this.billingOrderService.billingOrder(orderId, body.newAddress);
     }
 
     @Delete('id')

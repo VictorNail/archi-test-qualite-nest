@@ -6,12 +6,12 @@ export default class DeliveryOrderService {
 
     constructor(private readonly orderRepository: OrderRepositoryInterface) {
     }
-    public async deliveryOrder(orderId: string): Promise<Order> {
+    public async deliveryOrder(orderId: string, newDate: Date): Promise<Order> {
         const orderDelivered: Order = await this.orderRepository.findById(orderId);
         if (!orderDelivered) {
             throw new NotFoundException(Order.MESSAGE_NOT_FOUND_ORDER);
         }
-        orderDelivered.isDelivery(new Date());
+        orderDelivered.isDelivery(newDate);
         return orderDelivered;
     }
 
