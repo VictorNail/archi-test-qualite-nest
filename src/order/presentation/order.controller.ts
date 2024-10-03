@@ -6,25 +6,7 @@ import PayOrderService from "../domain/use-case/pay-order.service";
 import DeliveryOrderService from "../domain/use-case/delivery-order.service";
 import BillingOrderService from "../domain/use-case/billing-order.service";
 import CancelOrderService from "../domain/use-case/cancel-order.service";
-
-
-
-export class CreateOrderDto {
-
-  @IsNotEmpty()
-  @ArrayMinSize(1)
-  @ArrayMaxSize(5)
-  items: Array<OrderItem>;
-
-  @IsNotEmpty()
-  customerName: string;
-
-  @IsNotEmpty()
-  shippingAddress: string;
-
-  @IsNotEmpty()
-  invoiceAddress: string;
-}
+import {CreateOrderCommand} from "../domain/entity/order.entity";
 
 export class BillingOrderDto {
     @IsString()
@@ -51,7 +33,7 @@ export default class OrderController {
     }
 
     @Post()
-    async createOrders(@Body() body : CreateOrderDto) {
+    async createOrders(@Body() body : CreateOrderCommand) {
         return this.createOrderService.createOrder(body);
     }
 

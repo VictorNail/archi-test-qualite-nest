@@ -1,4 +1,4 @@
-import { OrderItem } from '../entity/order-item.entity';
+import {ItemDetailCommand, OrderItem} from '../entity/order-item.entity';
 import {
   Column,
   CreateDateColumn,
@@ -8,7 +8,15 @@ import {
 } from 'typeorm';
 import { Expose } from 'class-transformer';
 import {BadRequestException, NotFoundException} from "@nestjs/common";
+import {IsNotEmpty} from "class-validator";
 
+
+export interface CreateOrderCommand {
+  items: ItemDetailCommand[];
+  customerName: string;
+  shippingAddress: string;
+  invoiceAddress: string;
+}
 
 export enum Status{
   "PAID",
@@ -60,7 +68,7 @@ export class Order {
     nullable: true,
   })
   @Expose({ groups: ['group_orders'] })
-  orderItems: OrderItem[];
+  orderItems: OrderItem[] ;
 
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
@@ -90,15 +98,23 @@ export class Order {
   @Expose({ groups: ['group_orders'] })
   private cancelReason: string | null;
 
-  constructor(newCustomerName: string, newShippingAddress: string, newInvoiceAddress: string, newItems: Array<OrderItem>) {
-    this.customerName = newCustomerName;
-    this.shippingAddress = newShippingAddress;
-    this.invoiceAddress = newInvoiceAddress;
-    this.orderItems = newItems;
+  constructor(createOrderCommand?: CreateOrderCommand) {
+    if(!createOrderCommand){
+      return;
+    }
+    this.customerName = createOrderCommand.customerName ?? null;
+    this.shippingAddress = createOrderCommand.shippingAddress ?? null;
+    this.invoiceAddress = createOrderCommand.invoiceAddress ?? null;
+    this.orderItems = [];
+
+    createOrderCommand.items.forEach((newItem)=>{
+      this.orderItems.push(new OrderItem(newItem));
+    });
+
+    this.price = this.orderItems.reduce((sum,item) => sum + item.price,0);
     if( this.orderItems.length > Order.maxItem){
       throw new BadRequestException(Order.MESSAGE_MAX_ITEM_FOR_ORDER);
     }
-    this.price = this.orderItems.reduce((sum,item) => sum + item.price,0);
     if( this.price < Order.maxPriceForOrder){
       throw new BadRequestException(Order.MESSAGE_MAX_PRICE_FOR_ORDER);
     }

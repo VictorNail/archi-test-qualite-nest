@@ -20,6 +20,7 @@ import {OrderRepositoryInterface} from "./domain/port/order.repository.interface
       provide: 'OrderRepositoryInterface',
       useClass: OrderRepository,
     },
+    OrderRepositoryTypeOrm,
     {
       provide :CreateOrderService,
       useFactory: (orderRepository: OrderRepositoryInterface) => {

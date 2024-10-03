@@ -1,6 +1,6 @@
 import {Order, } from "../entity/order.entity";
-import OrderRepository from "../../infrastructure/order.repository";
 import {OrderRepositoryInterface} from "../port/order.repository.interface";
+import {NotFoundException} from "@nestjs/common";
 export default class BillingOrderService {
 
     constructor(
@@ -8,7 +8,10 @@ export default class BillingOrderService {
     ) {}
 
     public async billingOrder(orderId: string, newBillingAddress: string): Promise<Order> {
-        const orderBilled: Order = await this.orderRepository.getOrderById(orderId);
+        const orderBilled: Order = await this.orderRepository.findById(orderId);
+        if (!orderBilled) {
+            throw new NotFoundException(Order.MESSAGE_NOT_FOUND_ORDER);
+        }
         orderBilled.isBilled(newBillingAddress);
         return orderBilled;
     }
