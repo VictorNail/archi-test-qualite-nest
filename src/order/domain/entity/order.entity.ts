@@ -2,7 +2,7 @@ import {ItemDetailCommand, OrderItem} from '../entity/order-item.entity';
 import {
   Column,
   CreateDateColumn,
-  Entity,
+  Entity, ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -10,6 +10,8 @@ import { Expose } from 'class-transformer';
 import {BadRequestException, NotFoundException} from "@nestjs/common";
 import {IsNotEmpty} from "class-validator";
 import {PdfOrderRepositoryInterface} from "../port/pdf-order.repository.interface";
+import {Product} from "./product.entity";
+import {CreatePromotion, Promotion} from "./promotion.entity";
 
 
 export interface CreateOrderCommand {
@@ -17,6 +19,7 @@ export interface CreateOrderCommand {
   customerName: string;
   shippingAddress: string;
   invoiceAddress: string;
+  promotion?: CreatePromotion;
 }
 
 export enum Status{
@@ -38,6 +41,8 @@ export class Order {
   static MESSAGE_NOT_POSSIBLE_DELIVERY: string = "It is not possible to delivery for this order";
   static MESSAGE_SHIPPING_ADDRESS_NULL: string = "The shipping address is not listed";
   static MESSAGE_DELETE_IMPOSSIBLE: string = "Unable to delete order";
+  static MESSAGE_NOT_POSSIBLE_ADD_ITEM: string = "It is not possible to add item for this order";
+
 
 
 
@@ -71,6 +76,11 @@ export class Order {
   @Expose({ groups: ['group_orders'] })
   orderItems: OrderItem[] ;
 
+  @ManyToOne(() => Promotion, (promotion) => promotion.orders, {
+    nullable: true,
+  })
+  promotion: Promotion;
+
   @Column({ nullable: true })
   @Expose({ groups: ['group_orders'] })
   shippingAddress: string | null;
@@ -91,7 +101,7 @@ export class Order {
   @Expose({ groups: ['group_orders'] })
   private paidAt: Date | null;
 
-  @Column({ nullable: true })
+  @CreateDateColumn({ nullable: true })
   @Expose({ groups: ['group_orders'] })
   private cancelAt: Date | null;
 
@@ -106,19 +116,16 @@ export class Order {
     this.customerName = createOrderCommand.customerName ?? null;
     this.shippingAddress = createOrderCommand.shippingAddress ?? null;
     this.invoiceAddress = createOrderCommand.invoiceAddress ?? null;
+    if(createOrderCommand.promotion != undefined) this.promotion = new Promotion(createOrderCommand.promotion);
     this.orderItems = [];
 
     createOrderCommand.items.forEach((newItem)=>{
       this.orderItems.push(new OrderItem(newItem));
     });
-
-    this.price = this.orderItems.reduce((sum,item) => sum + item.price,0);
     if( this.orderItems.length > Order.maxItem){
       throw new BadRequestException(Order.MESSAGE_MAX_ITEM_FOR_ORDER);
     }
-    if( this.price < Order.maxPriceForOrder){
-      throw new BadRequestException(Order.MESSAGE_MAX_PRICE_FOR_ORDER);
-    }
+    this.calculatePrice();
   }
 
   public isPaid(){
@@ -152,6 +159,9 @@ export class Order {
     }
     this.cancelAt = new Date();
     this.cancelReason = cancelReason;
+    this.orderItems.forEach((item)=>{
+      item.product.addStock(item.quantity);
+    });
   }
 
   public isValid():boolean {
@@ -162,5 +172,24 @@ export class Order {
       if(this.status != Status.PENDING){
           pdfOrderRepository.generateOrder(this.customerName,this.orderItems);
       }
+  }
+
+  public addItem(newItem: ItemDetailCommand){
+    if(this.status != Status.PENDING){
+      throw  new BadRequestException(Order.MESSAGE_NOT_POSSIBLE_ADD_ITEM);
+    }
+    this.orderItems.push(new OrderItem(newItem));
+    this.calculatePrice();
+  }
+
+  private calculatePrice(){
+    this.price = this.orderItems.reduce((sum,item) => sum + item.price,0);
+    if(this.promotion != null){
+      this.price = this.price - this.promotion.amount;
+    }
+
+    if( this.price < Order.maxPriceForOrder){
+      throw new BadRequestException(Order.MESSAGE_MAX_PRICE_FOR_ORDER);
+    }
   }
 }

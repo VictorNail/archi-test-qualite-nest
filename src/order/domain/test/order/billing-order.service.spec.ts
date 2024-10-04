@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
-import {Order} from "../entity/order.entity";
-import {OrderRepositoryInterface} from "../port/order.repository.interface";
-import BillingOrderService from "../use-case/billing-order.service";
+import {Order} from "../../entity/order.entity";
+import {OrderRepositoryInterface} from "../../port/order.repository.interface";
+import BillingOrderService from "../../use-case/order/billing-order.service";
 
 class OrderRepositoryFake {
     async findById(_id: string): Promise<Order | null> {

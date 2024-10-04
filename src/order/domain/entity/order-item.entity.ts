@@ -1,10 +1,10 @@
 import { Order } from '../entity/order.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn} from 'typeorm';
+import {Product} from "./product.entity";
 
 
 export interface ItemDetailCommand {
-  productName: string;
-  price: number;
+  product: Product;
   quantity: number;
 }
 @Entity('order-item')
@@ -12,8 +12,8 @@ export class OrderItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  productName: string;
+  @ManyToOne(() => Order, (order) => order.orderItems)
+  product: Product;
 
   @Column({
     type: 'int',
@@ -32,8 +32,10 @@ export class OrderItem {
     if (!itemCommand) {
       return;
     }
-    this.productName = itemCommand.productName;
+    this.product = itemCommand.product;
     this.quantity = itemCommand.quantity;
-    this.price = itemCommand.price;
+    itemCommand.product.removeStock(itemCommand.quantity);
+
+    this.price = itemCommand.product.price * itemCommand.quantity;
   }
 }

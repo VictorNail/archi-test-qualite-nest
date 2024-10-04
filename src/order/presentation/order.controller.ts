@@ -1,12 +1,14 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Patch, Post, Put} from '@nestjs/common';
 import {ArrayMaxSize, ArrayMinSize, IsDate, IsNotEmpty, IsString} from "class-validator";
 import {OrderItem} from "../domain/entity/order-item.entity";
-import CreateOrderService from "../domain/use-case/create-order.service";
-import PayOrderService from "../domain/use-case/pay-order.service";
-import DeliveryOrderService from "../domain/use-case/delivery-order.service";
-import BillingOrderService from "../domain/use-case/billing-order.service";
-import CancelOrderService from "../domain/use-case/cancel-order.service";
+import CreateOrderService from "../domain/use-case/order/create-order.service";
+import PayOrderService from "../domain/use-case/order/pay-order.service";
+import DeliveryOrderService from "../domain/use-case/order/delivery-order.service";
+import BillingOrderService from "../domain/use-case/order/billing-order.service";
+import CancelOrderService from "../domain/use-case/order/cancel-order.service";
 import {CreateOrderCommand} from "../domain/entity/order.entity";
+import {CreateProduct} from "../domain/entity/product.entity";
+import AddItemOrderService from "../domain/use-case/order/add-item-order.service";
 
 export class NewAddressOrderDto {
     @IsString()
@@ -23,6 +25,13 @@ export class CancelOrderDto {
     reason: string;
 }
 
+export class AddItemDto {
+    @IsNotEmpty()
+    productId: string;
+    @IsNotEmpty()
+    quantity: number;
+}
+
 @Controller('/orders')
 export default class OrderController {
     constructor(
@@ -31,6 +40,7 @@ export default class OrderController {
         private readonly deliveryOrderService: DeliveryOrderService,
         private readonly billingOrderService: BillingOrderService,
         private readonly cancelOrderService: CancelOrderService,
+        private readonly addItemOrderService: AddItemOrderService
     ) {}
     @Get()
     async getOrders() {
@@ -55,6 +65,11 @@ export default class OrderController {
     @Put(':id/billing')
     async billingOrder(@Param('id') orderId: string, @Body() body : NewAddressOrderDto){
         return this.billingOrderService.billingOrder(orderId, body.newAddress);
+    }
+
+    @Put(':id')
+    async addItem(@Param('id') productId: string, @Body() body: AddItemDto ){
+        return this.addItemOrderService.execute(productId,body);
     }
 
     @Delete('id')

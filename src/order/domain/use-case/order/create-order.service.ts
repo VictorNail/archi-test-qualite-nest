@@ -1,5 +1,5 @@
-import {CreateOrderCommand, Order} from "../entity/order.entity";
-import {OrderRepositoryInterface} from "../port/order.repository.interface";
+import {CreateOrderCommand, Order} from "../../entity/order.entity";
+import {OrderRepositoryInterface} from "../../port/order.repository.interface";
 
 export default class CreateOrderService{
     constructor(private readonly orderRepository: OrderRepositoryInterface) {}

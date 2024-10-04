@@ -2,7 +2,6 @@ import {  Repository } from 'typeorm';
 import {Order} from '../domain/entity/order.entity';
 import {OrderItem} from "../domain/entity/order-item.entity";
 import {PdfOrderRepositoryInterface} from "../domain/port/pdf-order.repository.interface";
-import {PdfDocument} from "@ironsoftware/ironpdf";
 
 
 export default class PdfOrderRepositoryTypeOrm
@@ -10,7 +9,7 @@ export default class PdfOrderRepositoryTypeOrm
     implements PdfOrderRepositoryInterface
 {
     async generateOrder(orderId: string, items: OrderItem[]):Promise<string>{
-        const itemsHtml = items.map(item => `
+      /*  const itemsHtml = items.map(item => `
         <tr>
             <td>${item.productName}</td>
             <td>${item.quantity}</td>
@@ -40,6 +39,8 @@ export default class PdfOrderRepositoryTypeOrm
         const pdf = await PdfDocument.fromHtml(htmlContent);
         const pdfPath = `order-${orderId}.pdf`;
         await pdf.saveAs(pdfPath);
+    */
+        const pdfPath = `order-${orderId}.pdf`;
 
         return pdfPath;
     }

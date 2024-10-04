@@ -1,6 +1,6 @@
-import { Order } from '../entity/order.entity';
-import CreateOrderService from "../use-case/create-order.service";
-import {OrderRepositoryInterface} from "../port/order.repository.interface";
+import { Order } from '../../entity/order.entity';
+import CreateOrderService from "../../use-case/order/create-order.service";
+import {OrderRepositoryInterface} from "../../port/order.repository.interface";
 
 class OrderRepositoryFake {
     async save(order: Order): Promise<Order> {

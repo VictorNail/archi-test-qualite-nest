@@ -1,5 +1,5 @@
-import {Order} from "../entity/order.entity";
-import {OrderRepositoryInterface} from "../port/order.repository.interface";
+import {Order} from "../../entity/order.entity";
+import {OrderRepositoryInterface} from "../../port/order.repository.interface";
 import {NotFoundException} from "@nestjs/common";
 
 export default class DeliveryOrderService {

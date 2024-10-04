@@ -1,8 +1,8 @@
-import { Order } from '../entity/order.entity';
-import {OrderRepositoryInterface} from "../port/order.repository.interface";
-import {PdfOrderRepositoryInterface} from "../port/pdf-order.repository.interface";
-import pdfOrderService from "../use-case/pdf-order.service";
-import {OrderItem} from "../entity/order-item.entity";
+import { Order } from '../../entity/order.entity';
+import {OrderRepositoryInterface} from "../../port/order.repository.interface";
+import {PdfOrderRepositoryInterface} from "../../port/pdf-order.repository.interface";
+import pdfOrderService from "../../use-case/order/pdf-order.service";
+import {OrderItem} from "../../entity/order-item.entity";
 
 class OrderRepositoryFake {
     async save(order: Order): Promise<Order> {
